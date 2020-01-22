@@ -1,0 +1,122 @@
+package servlet;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.itextpdf.text.Anchor;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Font.FontFamily;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+ 
+@WebServlet("/pdfgen1")
+public class pdfgen1 extends HttpServlet {
+ private static final long serialVersionUID = 1L;
+ 
+ private String dbURL = "jdbc:mysql://localhost:3306/temp";
+ private String dbUser = "root";
+ private String dbPass = "admin";
+ 
+ public pdfgen1() {
+  super();
+ }
+ 
+ protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+  doPost(request, response);
+ }
+ 
+ protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+ 
+  ServletOutputStream os = response.getOutputStream();
+  response.setContentType("application/pdf"); 
+  Document doc = new Document();
+ 
+  Font bfBold18 = new Font(FontFamily.TIMES_ROMAN, 18, Font.BOLD, new BaseColor(0, 0, 0)); 
+  Font bfBold12 = new Font(FontFamily.TIMES_ROMAN, 12, Font.BOLDITALIC, new BaseColor(0, 0, 0)); 
+  Font bf12 = new Font(FontFamily.TIMES_ROMAN, 12); 
+ 
+  Connection conn = null; 
+  PreparedStatement pst=null;
+  String sql = null;
+ 
+  try{
+   
+   PdfWriter.getInstance(doc, os); 
+ 
+   doc.addAuthor("betterThanZero");
+   doc.addCreationDate();
+   doc.addProducer();
+   doc.addCreator("MySampleCode.com");
+   doc.addTitle("DemoPDF");
+   doc.setPageSize(PageSize.LETTER);
+   doc.open();
+   doc.add( new Paragraph("File details with status - ", bfBold18));
+   DriverManager.registerDriver(new com.mysql.jdbc.Driver());
+   conn = DriverManager.getConnection(dbURL, dbUser, dbPass);
+   String p_activity=request.getParameter("p_activity");
+   
+   sql="select t.f_name,t.f_date,t.fi_person,"
+   		+ "t.f_no,s.status FROM dropdown s JOIN (SELECT f.f_name,"
+   		+ "f.f_date,f.fi_person,f.f_no,s2.status,"
+   		+ "MAX(s2.rank_no) rank_no FROM file_details f "
+   		+ "JOIN logs l ON l.f_name = f.f_name JOIN "
+   		+ "dropdown s2 ON s2.s_no = l.s_no GROUP  BY f.f_name) t "
+   		+ "ON t.rank_no = s.rank_no and s.status="+p_activity;
+   
+   pst = conn.prepareStatement(sql);
+   pst.setString(1, p_activity);
+   
+   ResultSet rs = pst.executeQuery(); 
+   while(rs.next()){ 
+	    Anchor anchor = new Anchor(rs.getString("status").trim(),bfBold12);
+	    anchor.setReference("#" + rs.getString("f_name").trim());
+	    doc.add(anchor);
+	    doc.add( Chunk.NEWLINE );
+	   }   
+	   rs.first();
+	 
+	   while(rs.next()){ 
+	    doc.newPage();
+	    Paragraph countryParagraph = new Paragraph();
+	    Anchor anchor = new Anchor(rs.getString("status"), bfBold18);
+	    anchor.setName(rs.getString("f_name").trim());
+	    countryParagraph.add(anchor);
+	    doc.add(countryParagraph);
+	     
+	    doc.add( new Paragraph("File Name: " + rs.getString("f_name").trim(), bf12));
+	    doc.add( new Paragraph("File Creation Date: " + rs.getString("f_date").trim(), bf12));
+	    doc.add( new Paragraph("File Initiating Person: " + rs.getString("fi_person").trim(), bf12));
+	    doc.add( new Paragraph("File No.: " + rs.getString("f_no").trim(), bf12));
+	   }
+ 
+   rs.close();                                                                
+   pst.close();                                                              
+   pst = null;                                                               
+ 
+   conn.close();                                                              
+   conn = null;                                                    
+   doc.close(); 
+ 
+  }catch(DocumentException e){
+   e.printStackTrace();
+  }
+  catch(Exception e){
+   e.printStackTrace();
+  }
+ }
+}

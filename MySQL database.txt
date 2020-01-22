@@ -1,0 +1,83 @@
+sql- 
+create table file_details(f_name varchar(40) primary key,f_date date,fi_person varchar(40),f_no varchar(40));
+create table logs(s_no varchar(20),f_name varchar(40),activity varchar(100));
+create table dropdown(s_no varchar(20),status varchar(100),rank_no int);
+insert into file_details values('a1','2020-01-22','x','123');
+insert into file_details values('a2','2020-01-21','y','1234');
+insert into file_details values('a3','2020-01-20','z','12345');
+select * from file_details;
++--------+------------+-----------+-------+
+| f_name | f_date     | fi_person | f_no  |
++--------+------------+-----------+-------+
+| a1     | 2020-01-22 | x         | 123   |
+| a2     | 2020-01-21 | y         | 1234  |
+| a3     | 2020-01-20 | z         | 12345 |
++--------+------------+-----------+-------+
+
+insert into logs values ('1','a1','step1');
+insert into logs values ('2','a1','step2');
+insert into logs values ('3','a1','step3');
+insert into logs values ('1','a2','step1');
+insert into logs values ('2','a2','step2');
+insert into logs values ('3','a2','step3');
+insert into logs values ('1','a3','step1');
+insert into logs values ('2','a3','step2');
+insert into logs values ('3','a3','step3');
+insert into logs values ('4','a3','step4');
+select * from logs;
++------+--------+----------+
+| s_no | f_name | activity |
++------+--------+----------+
+| 1    | a1     | step1    |
+| 2    | a1     | step2    |
+| 3    | a1     | step3    |
+| 1    | a2     | step1    |
+| 2    | a2     | step2    |
+| 3    | a2     | step3    |
+| 1    | a3     | step1    |
+| 2    | a3     | step2    |
+| 3    | a3     | step3    |
+| 4    | a3     | step4    |
++------+--------+----------+
+
+insert into dropdown values ('1','step1',1);
+insert into dropdown values ('2','step2',2);
+insert into dropdown values ('3','step3',3);
+insert into dropdown values ('4','step4',4);
+insert into dropdown values ('5','step5',5);
+select * from dropdown;
++------+--------+---------+
+| s_no | status | rank_no |
++------+--------+---------+
+| 1    | step1  |       1 |
+| 2    | step2  |       2 |
+| 3    | step3  |       3 |
+| 4    | step4  |       4 |
+| 5    | step5  |       5 |
++------+--------+---------+
+
+describe file_details;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| f_name    | varchar(40) | NO   | PRI | NULL    |       |
+| f_date    | date        | YES  |     | NULL    |       |
+| fi_person | varchar(40) | YES  |     | NULL    |       |
+| f_no      | varchar(40) | YES  |     | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+describe logs;
++----------+--------------+------+-----+---------+-------+
+| Field    | Type         | Null | Key | Default | Extra |
++----------+--------------+------+-----+---------+-------+
+| s_no     | varchar(20)  | YES  |     | NULL    |       |
+| f_name   | varchar(40)  | YES  |     | NULL    |       |
+| activity | varchar(100) | YES  |     | NULL    |       |
++----------+--------------+------+-----+---------+-------+
+describe dropdown;
++---------+--------------+------+-----+---------+-------+
+| Field   | Type         | Null | Key | Default | Extra |
++---------+--------------+------+-----+---------+-------+
+| s_no    | varchar(20)  | YES  |     | NULL    |       |
+| status  | varchar(100) | YES  |     | NULL    |       |
+| rank_no | int(11)      | YES  |     | NULL    |       |
++---------+--------------+------+-----+---------+-------+
